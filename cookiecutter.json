@@ -1,6 +1,6 @@
 {
   "template": [
     "Lambda Stand Alone (./lambda-stand-alone)",
-    "Lambda with Scheduler (./lambda-scheduler"
+    "Lambda with Scheduler (./lambda-scheduler)"
   ]
 }
