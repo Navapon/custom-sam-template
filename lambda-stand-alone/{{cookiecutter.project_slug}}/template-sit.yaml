@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Lambda {{ cookiecutter.project_slug }} Sandbox/SIT Environment stack belong to {{ cookiecutter.ownership_team }} Team own by {{ cookiecutter.ownership_name }}
+
+Parameters:
+  FunctionName:
+    Type: String
+    Default: "{{ cookiecutter.project_slug}}"
+    Description: FunctionName inject params name conventions {repository-name}-{env} from workflows
+  FunctionDescription:
+    Type: String
+    Default: >
+      {{ cookiecutter.project_description }}
+      This service created by team {{ cookiecutter.ownership_team }} [{{ cookiecutter.ownership_name }}]
+    Description: Function Description Show at lambda
+  Project:
+    Type: String
+    Default: "{{ cookiecutter.project }}"
+  Team:
+    Type: String
+    Default: "{{ cookiecutter.ownership_team }}"
+  Environment:
+    Type: String
+    Default: "sandbox"
+  OwnershipName:
+    Type: String
+    Default: "{{ cookiecutter.ownership_name }}"
+  DataClassification:
+    Type: String
+    Default: "confidential"
+  Squad:
+    Type: String
+    Default: "{{ cookiecutter.squad }}"
+
+Globals:
+  Function:
+    Timeout: 15
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Ref FunctionName
+      Description: !Ref FunctionDescription
+      CodeUri: ./src
+      Handler: app.lambdaHandler
+      PackageType: Zip
+      Runtime: "{{ cookiecutter.run_time }}"
+      MemorySize: 256
+      Timeout: 15
+      Architectures:
+        - "arm64"
+      Role: arn:aws:iam::{{ cookiecutter.aws_account_id }}:role/lambda-role/{{ cookiecutter.project_slug }}-role
+      # Also AWS Parameter and Secrets help you handle secrets value example here
+      # https://aws.amazon.com/blogs/compute/using-the-aws-parameter-and-secrets-lambda-extension-to-cache-parameters-and-secrets/
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension-Arm64:20"
+        - !Sub "arn:aws:lambda:${AWS::Region}:044395824272:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:12"
+      Environment:
+        Variables:
+          ENV_NAME: "ENV_VALUE"
+      Tags:
+        Name: !Ref FunctionName
+        Description: !Ref FunctionDescription
+        Project: !Ref Project
+        Team: !Ref Team
+        Environment: !Ref Environment
+        OwnershipName: !Ref OwnershipName
+        DataClassification: !Ref DataClassification
+        Squad: !Ref Squad
+      # VpcConfig:
+      #   SecurityGroupIds:
+      #     - sg-1111111111
+      #   SubnetIds:
+      #     - "subnet-11111111",
+      #     - "subnet-22222222",
+      #     - "subnet-33333333"
+      # if you need create dedicated your own event trigger see
+      # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html#sam-property-function-api--examples\
+      # Event:
+    # Meta Data about build process
+    # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-build.html
+    # Metadata:
+    #   SkipBuild: True # In case you have your own prebuild process
+
+  ApplicationResourceGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name:
+        Fn::Sub: LambdaApplicationInsights-SAM-${AWS::StackName}
+      ResourceQuery:
+        Type: CLOUDFORMATION_STACK_1_0
+
+  ApplicationInsightsMonitoring:
+    Type: AWS::ApplicationInsights::Application
+    Properties:
+      ResourceGroupName:
+        Ref: ApplicationResourceGroup
+      AutoConfigurationEnabled: true
+
+Outputs:
+  FuntionOutput:
+    Description: Output of Function Arn
+    Value: !GetAtt Function.Arn

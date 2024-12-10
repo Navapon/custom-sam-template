@@ -1,0 +1,52 @@
+#{% raw %}
+name: Sample Deploy SAM
+on:
+  workflow_dispatch:
+
+jobs:
+  sam-build-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    timeout-minutes: 10
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf #v3.2.0
+
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 #v2.0.0
+        with:
+          python: 3.12
+
+      - name: Setup AWS CLI
+        id: aws-auth
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 #v4.0.2
+        with:
+          aws-region: 'ap-southeast-1'
+          role-to-assume: 'role-arn'
+          role-session-name: 'aws-assume-role-from-action'
+          role-duration-seconds: '900'
+
+      - name: Validate Template
+        run: |
+          sam validate --lint --template template-sit.yaml
+
+      - name: Building with Template template-sit.yaml
+        run: |
+          sam build --template template-sit.yaml --config-env dev
+        
+      - name: Deploy Lambda Stack
+        id: deploy-lambda
+        run: |
+          sam deploy --stack-name my-custem-name \
+            --config-env dev \
+            --region ap-southeast-1 \
+            --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_IAM \ # incase you need to need sam create iam role
+            --parameter-overrides "ParameterKey=FunctionName,ParameterValue=my-custem-name" 
+#{% endraw %}

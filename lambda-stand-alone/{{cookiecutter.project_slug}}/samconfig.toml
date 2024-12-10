@@ -1,0 +1,76 @@
+# More information about the configuration file can be found here:
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+# https://github.com/aws/aws-sam-cli/blob/develop/designs/sam-config.md
+version = 0.1
+
+############### Default for build and deploy config ##################
+[default]
+[default.global.parameters]
+region = "ap-southeast-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+disable_rollback = false
+stack_name = "{{ cookiecutter.project_slug }}"
+
+[default.build.parameters]
+parallel = true
+template = "template-sit.yaml"
+
+[default.validate.parameters]
+lint = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"
+
+############### Sit Environment for build and deploy config ##################
+[sit]
+[sit.build.parameters]
+template = "template-sit.yaml"
+
+[sit.deploy.parameters]
+s3_bucket = "sam-deployment-artifact-sandbox"
+tags = [
+  "Project={{ cookiecutter.project }}",
+  "Description={{ cookiecutter.project_description }}",
+  "AppManagerCFNStackKey={{ cookiecutter.project }}",
+  "Team={{ cookiecutter.ownership_team }}",
+  "Environment=sandbox",
+]
+disable_rollback = true
+
+############### Stg Environment for build and deploy config ##################
+[stg]
+[stg.build.parameters]
+template = "template-stg.yaml"
+
+[stg.deploy.parameters]
+s3_bucket = "sam-deployment-artifact-workload-nonprod"
+tags = [
+  "Project={{ cookiecutter.project }}",
+  "Description={{ cookiecutter.project_description }}",
+  "AppManagerCFNStackKey={{ cookiecutter.project }}",
+  "Team={{ cookiecutter.ownership_team }}",
+  "Environment=workload-nonprod",
+]
+disable_rollback = true
+
+############### Prod Environment for build and deploy config ##################
+[prod]
+[prod.build.parameters]
+template = "template-prod.yaml"
+
+[prod.deploy.parameters]
+s3_bucket = "sam-deployment-artifact-workload-prod"
+tags = [
+  "Project={{ cookiecutter.project }}",
+  "Description={{ cookiecutter.project_description }}",
+  "AppManagerCFNStackKey={{ cookiecutter.project }}",
+  "Team={{ cookiecutter.ownership_team }}",
+  "Environment=workload-prod",
+]
