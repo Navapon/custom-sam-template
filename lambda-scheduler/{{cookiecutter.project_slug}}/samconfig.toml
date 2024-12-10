@@ -1,0 +1,29 @@
+# More information about the configuration file can be found here:
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
+# https://github.com/aws/aws-sam-cli/blob/develop/designs/sam-config.md
+version = 0.1
+
+############### Default for build and deploy config ##################
+[default]
+[default.global.parameters]
+region = "ap-southeast-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+disable_rollback = false
+stack_name = "{{ cookiecutter.project_slug }}"
+
+[default.build.parameters]
+parallel = true
+template = "template.yaml"
+
+[default.validate.parameters]
+lint = true
+
+[default.sync.parameters]
+watch = true
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[default.local_start_lambda.parameters]
+warm_containers = "EAGER"

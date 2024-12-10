@@ -1,0 +1,39 @@
+{
+  "project_name": "Your Git Repository Name",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('_','-') }}",
+  "run_time": "python3.12",
+  "project": [
+    "project1",
+    "project2",
+    "project3"
+  ],
+  "project_description": "Tell more about Project Description",
+  "ownership_team": [
+    "teamA",
+    "teamB",
+    "teamC"
+  ],
+  "squad": [
+    "squadA",
+    "squadB",
+    "squadC"
+  ],
+  "ownership_name": "",
+  "github_user": "",
+  "aws_account_id": [
+    "11111111111",
+    "22222222222"
+  ],
+  "__prompts__": {
+    "project_name": "Type your Github Repository Project Name.",
+    "project_slug": "Auto converting name convention to be is that ok ?",
+    "run_time": "Lambda Runtime Language.",
+    "project": "This Lambda is part of which project.",
+    "project_description": "What is the primary purpose of this service.",
+    "ownership_team": "Select Projects Belong to which team.",
+    "ownership_name": "Your Name Please.",
+    "squad": "This project belongs to which Squad.",
+    "github_user": "Your GitHub username see at github.com/yourprofilename",
+    "aws_account_id": "Your AWS Account ID"
+  }
+}

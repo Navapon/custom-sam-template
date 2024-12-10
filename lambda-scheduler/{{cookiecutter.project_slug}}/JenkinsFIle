@@ -1,0 +1,67 @@
+//  This just sample create by AmazonQ donot test yet just an idea
+pipeline {
+    agent any
+    
+    environment {
+        AWS_ACCOUNT_ID = credentials('{{cookiecutter.aws_account_id}}')
+        AWS_REGION = 'us-east-1'  // Change to your region
+        ECR_REPOSITORY = 'your-ecr-repo-name'
+        IMAGE_TAG = 'latest'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${ECR_REPOSITORY}:${IMAGE_TAG}")
+                }
+            }
+        }
+        
+        stage('AWS ECR Login') {
+            steps {
+                script {
+                    sh """
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                    """
+                }
+            }
+        }
+        
+        stage('Tag and Push') {
+            steps {
+                script {
+                    sh """
+                        docker tag ${ECR_REPOSITORY}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+                        docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+        
+        stage('Update Lambda') {
+            steps {
+                script {
+                    sh """
+                        aws lambda update-function-code \
+                            --function-name your-lambda-function-name \
+                            --image-uri ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up Docker images
+            sh 'docker system prune -f'
+        }
+    }
+}
