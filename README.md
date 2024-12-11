@@ -3,6 +3,8 @@
 This Repository provided a cookiecutter template for the Lambda application.
 It contains pre-defined deployment and structure of the project setup.
 
+For example resource help who would like to create custom your own template followed by this [BlogPost](https://dev.to/navapon/crafting-a-custom-sam-template-for-your-aws-lambda-function-resource-and-operations-58md)
+
 ## Quick Start Guide
 
 Install pre-required components
